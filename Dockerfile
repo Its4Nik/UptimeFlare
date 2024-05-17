@@ -1,35 +1,25 @@
-    # Use Node.js 20 Alpine as base image
-    FROM node:20-alpine AS base
+# Use Node.js slim base image
+FROM node:slim
 
-    # Update package index
-    RUN apk update
+# Create and set the working directory
+WORKDIR /app
 
-    # Create directories
-    RUN mkdir -p /app && \
-        mkdir -p /tmp/package
+# Copy the application code to the working directory
+COPY ./data /app
 
-    # Copy package.json files to /tmp/package/
-    COPY ./data/package*.json /tmp/package/
+# Install global npm packages and local dependencies
+RUN npm install -g npm wrangler typescript 
 
-    # Change working directory to /tmp/package/ and install wrangler globally and npm packages
-    RUN cd /tmp/package && \
-        npm install -g wrangler@latest && \
-        npm install
+RUN wrangler build -c worker/wrangler-dev.toml
 
-    # Set working directory to /app
-    WORKDIR /app
+# Create a .env file
+RUN touch .env
 
-    # Create a .env file
-    RUN touch /app/.env
+# Define volume for /app
+VOLUME [ "/app" ]
 
-    # Copy the application code to /app
-    COPY ./data /app
+# Expose port 9999
+EXPOSE 9999
 
-    # Define volume for /app
-    VOLUME [ "/app" ]
-
-    # Expose port 9999
-    EXPOSE 9999
-
-    # Set the default command to run the development server
-    CMD ["wrangler", "dev", "-c", "worker/wrangler-dev.toml", "--node-compat", "--port", "9999", "--log-level", "debug"]
+# Set the default command to run the development server
+CMD ["wrangler", "dev", "-c", "worker/wrangler-dev.toml", "--tsconfig", "worker/tsconfig.json", "--no-bundle", "--node-compat", "--port", "9999", "--log-level", "debug"]
