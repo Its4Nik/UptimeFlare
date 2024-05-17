@@ -1,4 +1,4 @@
-Enter the docker file contents into your Dockerfile and in the sam directory do this:
+Enter the Dockerfile (the Dockerfile inside this repo) contents into your Dockerfile and in the sam directory do this:
 
 `git clone https://github.com/lyc8503/UptimeFlare data/`
 
